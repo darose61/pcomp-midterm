@@ -1,0 +1,215 @@
+/* V2.0
+ Now with an LDR as a pitch bend!
+ */
+
+import processing.serial.*; // import the Processing serial library
+Serial myPort;              // The serial port
+
+/*
+Synthesizing Sond
+ */
+import processing.serial.*;
+import ddf.minim.*; // Import Minim Library
+import ddf.minim.ugens.*; // Import UGens Library, that is inside of the Minim
+
+//First thing to do to play synthesized sound is get an AudioOutput
+
+Minim minim;
+AudioOutput out;
+Oscil wave;
+MoogFilter moog;
+Pan pan;
+
+/*
+Global Variables
+ */
+
+// Total number of sensors
+int numberOfSensors = 15;
+// Pushbutton Variables
+int but1, but2, but3, but4, but5, but6, but7, but8, but9, but10;
+// Potentiometer Variables
+float pot1, pot2, pot3, pot4;
+// LDR Variable
+float ldr;
+// Hold actual frequency
+float freqNow;
+
+/*
+GO!
+ */
+
+void setup() {
+  size(800, 600);
+
+  /*
+  Serial Related
+   */
+
+  // List all the available serial ports
+  println(Serial.list());
+
+  // I know that the first port in the serial list on my computer
+  // is always my  Arduino module, so I open Serial.list()[0].
+  // Change the 0 to the appropriate number of the serial port
+  // that your microcontroller is attached to.
+  String portName = "/dev/cu.usbmodem1451";
+  myPort = new Serial(this, portName, 9600);
+  // read incoming bytes to a buffer
+  // until you get a linefeed (ASCII 10):
+  myPort.bufferUntil('\n');
+
+  /*
+  Sound Related
+   */
+  minim = new Minim(this);
+  // use the getLineOut method of the Minim object to get an AudioOutput object
+  out = minim.getLineOut();
+  // construct a low pass MoogFilter with a 
+  // cutoff frequency of 1200 Hz and a resonance of 0.5
+  moog = new MoogFilter( 1200, 0 );
+  // create a sine wave Oscil, set to 440 Hz, at 0.5 amplitude
+  wave = new Oscil( 440, 0f, Waves.SINE );
+  // patch the Oscil to the output
+  wave.patch(moog).patch(out);
+}
+
+void draw() {
+
+  // Use the potentiometers:
+  potentiometers();
+  // Use the buttons:
+  pressButtons();  
+  // If no button is pressed, produce no sound
+  if (but1 == 0 && but2 == 0 && but3 == 0 && but4 == 0 && but5 == 0 && but6 == 0 && but7 == 0 && but8 == 0 && but9 == 0 && but10 == 0) {
+    wave.setFrequency(0);
+  } else {
+    wave.setFrequency(freqNow+ldr); // Attatch the LDR to the actual frequency, creating a pitch bend effect.
+  }
+}
+
+
+
+void pressButtons () {
+
+  /*
+  Assigning notes to buttons
+   */
+  // Button 1 = C4
+  if (but1 == 1) {
+    freqNow = 261.63;
+  }
+  // Button 2 = C#4
+  if (but2 == 1) {
+    freqNow = 277.18;
+  }
+  // Button 3 = D4
+  if (but3 == 1) {
+    freqNow= 293.66;
+  }
+  // Button 4 = D#4
+  if (but4 == 1) {
+    freqNow = 311.13;
+  }
+  // Button 5 = E4
+  if (but5 == 1) {
+    freqNow = 329.63;
+  }
+  // Button 6 = F4
+  if (but6 == 1) {
+    freqNow = 349.23;
+  }
+  // Button 7 = F#4
+  if (but7 == 1) {
+    freqNow = 369.99;
+  }
+  // Button 8 = G4
+  if (but8 == 1) {
+    freqNow = 392.00;
+  }
+  // Button 9 = G#4
+  if (but9 == 1) {
+    freqNow = 415.30;
+  }
+  // Button 10 = A4
+  if (but10 == 1) {
+    freqNow = 440;
+  }
+}
+
+
+ void potentiometers() {
+  
+  /*
+  Potentiometers Sound Properties
+   */
+
+  // The first potentiometer controls the amplitude
+  wave.setAmplitude(pot1);
+  // The second potentiometer allows the user to choose between different kinds of wave
+  if (pot2 <= 204) {
+    wave.setWaveform( Waves.SAW );
+  } else if  (pot2 > 204 && pot2 <= 408) {
+    wave.setWaveform( Waves.SINE );
+  } else if ( pot2 > 408 && pot2 <= 612 ) {
+    wave.setWaveform( Waves.SQUARE );
+  } else if (pot2 > 612 && pot2 <= 816 ) {
+    wave.setWaveform (Waves.TRIANGLE);
+  } else if (pot2 >816) {
+    wave.setWaveform (Waves.QUARTERPULSE);
+  }
+  // The third potentiometer controls the frequency of the filter
+  moog.frequency.setLastValue(pot3);
+  // The fourth potentiometer controls the resonance of the filter
+  moog.resonance.setLastValue(pot4);
+  
+  }
+  
+  void serialEvent(Serial myPort) {
+  // read the serial buffer:
+  String myString = myPort.readStringUntil('\n');
+  //println(myString);
+
+
+  if (myString != null) { // If the reading is not null
+
+      myString = trim(myString); // trim: Removes whitespace characters from the beginning and end of a String.
+
+    // split the string at the commas
+    // and convert the sections into integers:
+    int sensors[] = int(split(myString, ',')); // Create an array with the numbers it gets from string and transform them into integers (actual sensors)
+    printArray(sensors); // Print the array sensors.
+
+    for (int sensorNum = 0; sensorNum < sensors.length; sensorNum++) { // Assign number to each sensor on the array
+      print("Sensor " + sensorNum + ": " + sensors[sensorNum] + "\t"); // Print Sensor: sensors[sensorNum]
+    }
+
+    if (sensors.length == numberOfSensors) { // If the array has X slots (x equals the number of sensors):
+      
+      // Mapping the potentiometers
+      pot1 = map(sensors[0], 1023, 0, 0, 1);
+      pot2 = sensors[1];
+      pot3 = map(sensors[2], 1023, 0, 110, 2000);
+      pot4 = map(sensors[3], 1023, 0, 0, 1);
+      
+     // Mapping the LDR
+     ldr = map(sensors[4], 0,40,50,0);
+      
+      // Assigning pushbuttons
+      but1 = sensors[5];
+      but2 = sensors[6];
+      but3 = sensors[7];
+      but4 = sensors[8];
+      but5 = sensors[9];
+      but6 = sensors[10];
+      but7 = sensors[11];
+      but8 = sensors[12];
+      but9 = sensors[13];
+      but10 = sensors[14];
+
+      // }
+      // add a linefeed at the end:
+      println();
+    }
+  }
+}
