@@ -1,0 +1,69 @@
+import processing.serial.*; // import the Processing serial library
+Serial myPort;              // The serial port
+
+int numberOfSensors = 4;
+float fgcolor = 0;               // Fill color defaults to black
+float xpos, ypos, bColor;            // Starting position of the ball
+
+void setup() {
+  size(800, 600);
+  // List all the available serial ports
+  println(Serial.list());
+
+  // I know that the first port in the serial list on my computer
+  // is always my  Arduino module, so I open Serial.list()[0].
+  // Change the 0 to the appropriate number of the serial port
+  // that your microcontroller is attached to.
+  String portName = "/dev/tty.usbmodem1451";
+  myPort = new Serial(this, portName, 9600);
+  // read incoming bytes to a buffer
+  // until you get a linefeed (ASCII 10):
+  myPort.bufferUntil('\n');
+}
+
+void draw() {
+  background(bColor); // blue background
+  fill(fgcolor);
+  // Draw the shape
+  ellipse(xpos, ypos, 20, 20);
+  // twiddle your thumbs
+}
+
+void serialEvent(Serial myPort) {
+  // read the serial buffer:
+  String myString = myPort.readStringUntil('\n');
+  //println(myString);
+
+
+  if (myString != null) { // If the reading is not null
+
+      myString = trim(myString); // trim: Removes whitespace characters from the beginning and end of a String.
+
+    // split the string at the commas
+    // and convert the sections into integers:
+    int sensors[] = int(split(myString, ',')); // Create an array with the numbers it gets from string and transform them into integers (actual values)
+    printArray(sensors); // Print the array values.
+    
+    for (int sensorNum = 0; sensorNum < sensors.length; sensorNum++) { // Assign number to each sensor on the array
+      print("Sensor " + sensorNum + ": " + sensors[sensorNum] + "\t"); // Print Sensor: sensors[sensorNum]
+    }
+    
+    if (sensors.length == numberOfSensors) { // If the array has X slots (x equals the number of sensors):
+      xpos = sensors[0];
+      ypos = sensors[1];
+      // the pushbutton will send 0 or 1.
+      // This converts them to 0 or 255:
+      fgcolor = sensors[2] * 255;
+
+      // Map the LDR
+      bColor = map(sensors[3], 0, 65, 0, 255);
+
+      xpos = map(sensors[0], 0, 1023, 0, width);
+      ypos = map(sensors[1], 0, 1023, 0, height);
+    }
+    // add a linefeed at the end:
+    println();
+  }
+  print("xpos: " + xpos + "\t" + "ypos: " + ypos + "\t" + "fgcolor: " + fgcolor + "\t" + "bColor: " + bColor + "\t");
+  println();
+}
