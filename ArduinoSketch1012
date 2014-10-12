@@ -1,0 +1,58 @@
+void setup() {
+  // configure the serial connection:
+  Serial.begin(9600);
+  // configure the digital input:
+  for (int i=2; i <=11; i++) {
+    pinMode(i, INPUT);
+  }
+}
+
+
+void loop() {
+  // Read the first potentiometer:
+  int sensorValue = analogRead(A0);
+  // print the results:
+  Serial.print(sensorValue);
+  Serial.print(",");
+
+  // Read the second potentiometer:
+  sensorValue = analogRead(A1);
+  // print the results:
+  Serial.print(sensorValue);
+  Serial.print(",");
+
+  // Read the third potentiometer:
+  sensorValue = analogRead(A2);
+  // print the results:
+  Serial.print(sensorValue);
+  Serial.print(",");
+
+  // Read the fourth potentiometer:
+  sensorValue = analogRead(A3);
+  Serial.print(sensorValue);
+  Serial.print(",");
+
+  // Read the LDR:
+  sensorValue = analogRead(A4);
+  Serial.print(sensorValue);
+  Serial.print(",");
+
+  // Read pushbuttons 2 to 10:
+  for (int i=2; i <=10; i++) {
+    // read the sensor:
+    sensorValue = digitalRead(i);
+    // print the results:
+    Serial.print(sensorValue);
+    Serial.print(",");
+  }
+
+  // Read pushbutton 11:
+  sensorValue = digitalRead(11);                
+  // print the results:
+  Serial.println(sensorValue);
+
+}
+
+
+
+
