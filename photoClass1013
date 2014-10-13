@@ -1,0 +1,32 @@
+class Photo {
+  boolean state=false;
+  int x, y, w, h, x2, y2, w2, h2;
+
+  Photo(int _x, int _y, int _w, int _h, int _x2, int _y2, int _w2, int _h2) {
+    x=_x;
+    y=_y;
+    w=_w;
+    h=_h;
+    x2= _x2;
+    y2= _y2;
+    w2= _w2;
+    h2= _h2;
+  }
+
+  void drawPhoto() {
+    // if (state == true) {
+    //   fill(255,0,0);
+    // } else {
+    //   fill(0);
+    // }
+    fill(255);
+    rect(x, y, w, h);
+    fill(0);
+    ellipse(x2, y2, w2, h2);
+  }
+
+
+  void buttonReset() {
+    state = false;
+  }
+}
