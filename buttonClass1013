@@ -1,0 +1,26 @@
+class Button {
+  int state=0;
+  int x, y, w, h;
+
+  Button(int _x, int _y, int _w, int _h) {
+    x=_x;
+    y=_y;
+    w=_w;
+    h=_h;
+  }
+
+  void drawButton(int ourButton) {
+    //color the buttons
+    if (ourButton == 1) {
+      fill(255,0,0);
+    } else {
+      fill(0);
+    }
+    ellipse(x, y, w, h);
+  }
+
+
+  // void buttonReset() {
+  //   state = 0;
+  // }
+}
