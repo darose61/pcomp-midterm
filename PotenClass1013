@@ -1,0 +1,30 @@
+class Pot {
+  boolean state=false;
+  int x, y, w, h;
+
+  Pot(int _x, int _y, int _w, int _h) {
+    x=_x;
+    y=_y;
+    w=_w;
+    h=_h;
+    // w2= _w2;
+    // h2= _h2;
+  }
+
+  void drawPot(float w2) {
+    // if (state == true) {
+    //   fill(255,0,0);
+    // } else {
+    //   fill(0);
+    // }
+    fill(255);
+    ellipse(x, y, w, h);
+    fill(0);
+    ellipse(x, y, w2, w2);
+  }
+
+
+  void potReset() {
+    state = false;
+  }
+}
